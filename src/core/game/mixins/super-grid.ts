@@ -112,8 +112,8 @@ export function mixSuperGrid<
         /** The list of all abbreviated names for each piece that is in the game. Each piece should be represented by a single character. */
         public readonly possiblePieces!: string;
 
-        /** 2D list of what pieces are placed in cells on the board. Space characters denote an empty cell. */
-        public board!: string[];
+        /** 2D list of what pieces are placed in cells on the board. Each piece should be one character. Space characters denote an empty cell. */
+        public board!: string[][];
 
         /** All information needed for the repString that is not shared between all SuperGrid games. */
         public auxiliary!: string[]
@@ -125,7 +125,7 @@ export function mixSuperGrid<
         public readonly gameOverMessages!: { [index: number]: string }
 
         /** Defines the order in which players take their turns. Each player name should be one character. */
-        public playerOrder!: string;
+        public playerOrder!: string[];
 
         /**
          * Validates a move, then updates board, auxiliary, and repString accordingly.
@@ -142,6 +142,7 @@ export function mixSuperGrid<
         /**
          * Updates the repString given the current board and auxiliary information.
          * Does not typically need to be overwritten by subgame.
+         * Assumes pieces and player names are represented as single characters. Override this function if that is not true for your game.
          */
         public updateRepString(): void {
             let newRepString: string = "";
