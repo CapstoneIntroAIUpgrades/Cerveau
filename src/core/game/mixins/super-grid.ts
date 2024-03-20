@@ -1,5 +1,4 @@
 import { BasePlayer } from "~/core/game";
-import { Point } from "~/utils";
 import * as Base from "./base";
 
 /** A player in a super grid game. */
@@ -41,10 +40,13 @@ export class SuperGridMove {
     public readonly placeY: number | null;
 
     constructor(
-        startX = null, startY = null,
-        endX = null, endY = null,
+        startX = null,
+        startY = null,
+        endX = null,
+        endY = null,
         placedPiece = null,
-        placeX = null, placeY = null
+        placeX = null,
+        placeY = null,
     ) {
         this.startX = startX;
         this.startY = startY;
@@ -74,7 +76,6 @@ export function mixSuperGrid<
     /** The GameSettings to extend. */
     GameSettings: TBaseGameSettings;
 }) {
-
     /** The settings for a SuperGrid game. */
     class SuperGridGameSettings extends base.GameSettings {
         /** The schema for a SuperGrid game, adding in configurable grid sizes. */
@@ -116,13 +117,13 @@ export function mixSuperGrid<
         public board!: string[][];
 
         /** All information needed for the repString that is not shared between all SuperGrid games. */
-        public auxiliary!: string[]
+        public auxiliary!: string[];
 
         /** A string describing all of the information necessary to fully describe the game's state. */
         public repString!: string;
 
         /** Maps different endings of the game to specific game over messages. */
-        public readonly gameOverMessages!: { [index: number]: string }
+        public readonly gameOverMessages!: { [index: number]: string };
 
         /** Defines the order in which players take their turns. Each player name should be one character. */
         public playerOrder!: string[];
@@ -130,13 +131,13 @@ export function mixSuperGrid<
         /**
          * Validates a move, then updates board, auxiliary, and repString accordingly.
          * Expected to be overwritten by subgame.
-         * 
+         *
          * @param move - The attempted move in a standardized SuperGridMove object.
          *
          * @returns A boolean that is True if move is valid or False if move is not valid.
          */
         public transition(move: SuperGridMove): boolean {
-            return False;
+            return false;
         }
 
         /**
@@ -148,42 +149,42 @@ export function mixSuperGrid<
             let newRepString: string = "";
 
             // Update board information.
-            for (let row = rows - 1; row >= 0; row--) {
+            for (let row = this.rows - 1; row >= 0; row--) {
                 let spaces = 0;
-                for (let col = 0; col < cols; col++) {
-                    if (board[row][col] == ' ') {
-                        spaces++
-                    }
-                    else {
+                for (let col = 0; col < this.cols; col++) {
+                    if (this.board[row][col] == " ") {
+                        spaces++;
+                    } else {
                         if (spaces != 0) {
                             newRepString += spaces;
                             spaces = 0;
                         }
-                        newRepString += board[row][col];
+                        newRepString += this.board[row][col];
                     }
                 }
                 if (spaces != 0) {
                     newRepString += spaces;
                 }
                 if (row != 0) {
-                    newRepString += '/';
+                    newRepString += "/";
                 }
             }
 
             // Update turn player information.
-            newRepString += ' ';
-            let curPlayer: string = repString.split(“ “, 2)[1][0];
-            let curPlayerIndex: number = playerOrder.indexOf(curPlayer);
-            let nextPlayerIndex: number = (curPlayerIndex + 1) % playerOrder.length;
-            newRepString += playerOrder[nextPlayerIndex];
+            newRepString += " ";
+            let curPlayer: string = this.repString.split(" ", 2)[1][0];
+            let curPlayerIndex: number = this.playerOrder.indexOf(curPlayer);
+            let nextPlayerIndex: number =
+                (curPlayerIndex + 1) % this.playerOrder.length;
+            newRepString += this.playerOrder[nextPlayerIndex];
 
             // Update auxiliary information.
-            for (let i = 0; i < auxiliary.length; i++) {
-                newRepString += ' ';
-                newRepString += auxiliary[i];
+            for (let i = 0; i < this.auxiliary.length; i++) {
+                newRepString += " ";
+                newRepString += this.auxiliary[i];
             }
 
-            repString = newRepString;
+            this.repString = newRepString;
         }
 
         /**
@@ -204,7 +205,7 @@ export function mixSuperGrid<
          *
          * @returns A number. 0 if game is not over. Other values indicate how the game has ended via the gameOverMessages dictionary.
          */
-        public isGameOver():  {
+        public isGameOver(): number {
             return 1;
         }
     }
