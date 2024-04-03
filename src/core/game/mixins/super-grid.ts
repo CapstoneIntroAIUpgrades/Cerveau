@@ -18,43 +18,43 @@ export type SuperGridPlayer = BasePlayer;
 // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
 
 export class SuperGridMove {
-    /** The x position of the piece that will be moved. Null if not used. */
-    public readonly startX: number | null;
+    /** The row position of the piece that will be moved. Null if not used. */
+    public readonly startRow: number | null;
 
-    /** The y position of the piece that will be moved. Null if not used. */
-    public readonly startY: number | null;
+    /** The col position of the piece that will be moved. Null if not used. */
+    public readonly startCol: number | null;
 
-    /** The x position of where the moving piece moved. Null if not used. */
-    public readonly endX: number | null;
+    /** The row position of where the moving piece moved. Null if not used. */
+    public readonly endRow: number | null;
 
-    /** The y position of where the moving piece moved. Null if not used. */
-    public readonly endY: number | null;
+    /** The col position of where the moving piece moved. Null if not used. */
+    public readonly endCol: number | null;
 
     /** The name of the piece that will be placed onto the board. Null if not used. */
     public readonly placedPiece: string | null;
 
-    /** The x position of the piece that will be placed onto the board. Null if not used. */
-    public readonly placeX: number | null;
+    /** The row position of the piece that will be placed onto the board. Null if not used. */
+    public readonly placeRow: number | null;
 
-    /** The y position of the piece that will be placed onto the board. Null if not used. */
-    public readonly placeY: number | null;
+    /** The col position of the piece that will be placed onto the board. Null if not used. */
+    public readonly placeCol: number | null;
 
     constructor(
-        startX = null,
-        startY = null,
-        endX = null,
-        endY = null,
-        placedPiece = null,
-        placeX = null,
-        placeY = null,
+        startRow: null | number = null,
+        startCol: null | number = null,
+        endRow: null | number = null,
+        endCol: null | number = null,
+        placedPiece: null | string = null,
+        placeRow: null | number = null,
+        placeCol: null | number = null,
     ) {
-        this.startX = startX;
-        this.startY = startY;
-        this.endX = endX;
-        this.endY = endY;
+        this.startRow = startRow;
+        this.startCol = startCol;
+        this.endRow = endRow;
+        this.endCol = endCol;
         this.placedPiece = placedPiece;
-        this.placeX = placeX;
-        this.placeY = placeY;
+        this.placeRow = placeRow;
+        this.placeCol = placeCol;
     }
 }
 
@@ -102,25 +102,12 @@ export function mixSuperGrid<
         public values = this.initialValues(this.schema);
     }
 
-    /** A super grid game. */
-    class SuperGridGame extends base.Game {
-        /** The number of rows in the game. */
-        public readonly rows!: number;
-
-        /** The number of columns in the game. */
-        public readonly cols!: number;
-
-        /** The list of all abbreviated names for each piece that is in the game. Each piece should be represented by a single character. */
-        public readonly possiblePieces!: string;
-
+    class SuperGridGameManager extends base.GameManager {
         /** 2D list of what pieces are placed in cells on the board. Each piece should be one character. Space characters denote an empty cell. */
         public board!: string[][];
 
         /** All information needed for the repString that is not shared between all SuperGrid games. */
         public auxiliary!: string[];
-
-        /** A string describing all of the information necessary to fully describe the game's state. */
-        public repString!: string;
 
         /** Maps different endings of the game to specific game over messages. */
         public readonly gameOverMessages!: { [index: number]: string };
@@ -128,30 +115,106 @@ export function mixSuperGrid<
         /** Defines the order in which players take their turns. Each player name should be one character. */
         public playerOrder!: string[];
 
+        public readonly game!: SuperGridGame;
+
+        protected start(): void {
+            super.start();
+            this.board = [];
+            for (let i = 0; i < this.game.rows; i++) {
+                this.board.push([]);
+                for (let j = 0; j < this.game.cols; j++) {
+                    this.board[i].push(" ");
+                }
+            }
+            this.auxiliary = [];
+            this.setInitialBoardState();
+            this.initRepString();
+            void this.processTurn();
+        }
+
+        /** Should be overridden by subgame.
+         *  Initializes the board by setting the starting pieces, auxiliary information, etc.
+         */
+        protected setInitialBoardState(): void {}
+
+        /** Process a turn of the game.
+         * Should recursively call itself until the game is over. */
+        protected async processTurn(): Promise<void> {
+            let curPlayer: string = this.game.repString.split(" ", 2)[1][0];
+            let playerIndex: number = this.playerOrder.indexOf(curPlayer);
+            const player = this.game.players[playerIndex];
+            const move = await (player.ai as SuperGridGameAI).makeMove();
+            if (!this.transition(this.convertSubmoveToMove(move), player)) {
+                this.declareLoser(`Made an invalid move ('${move}').`, player);
+                for (let i = 0; i < this.game.players.length; i++) {
+                    if (i != playerIndex)
+                        this.declareWinner(
+                            "Opponent made an invalid move.",
+                            this.game.players[i],
+                        );
+                }
+                this.endGame();
+            }
+            this.updateRepString();
+            const turnCode = this.getGameOverCode();
+            if (turnCode == 0) void this.processTurn();
+            else {
+                this.declareWinnersAndLosers(turnCode);
+                this.endGame();
+            }
+        }
+
+        /**Intended to be overwritten.
+         * Declares who the players that won and lost given a specific game over code. */
+        protected declareWinnersAndLosers(gameOverCode: number): void {
+            // Pass. Intended to be overridden by a game.
+        }
+
+        /**
+         * Translates move notation from the sub-game into the standardized SuperGridMove object.
+         * Expected to be overwritten by subgame.
+         *
+         * @param subMove - A string describing the move made in the sub-game's unique notation.
+         *
+         * @returns Move in standardized SuperGridMove object.
+         */
+        protected convertSubmoveToMove(subMove: string): SuperGridMove {
+            return new SuperGridMove();
+        }
+
+        /**
+         * Checks if the game should end.
+         * Expected to be overwritten by subgame.
+         *
+         * @returns A number. 0 if game is not over. Other values indicate how the game has ended via the gameOverMessages dictionary.
+         */
+        protected getGameOverCode(): number {
+            return 1;
+        }
+
         /**
          * Validates a move, then updates board, auxiliary, and repString accordingly.
          * Expected to be overwritten by subgame.
          *
          * @param move - The attempted move in a standardized SuperGridMove object.
+         * @param player - The player that is attempting the move.
          *
          * @returns A boolean that is True if move is valid or False if move is not valid.
          */
-        public transition(move: SuperGridMove): boolean {
+        protected transition(
+            move: SuperGridMove,
+            player: SuperGridPlayer,
+        ): boolean {
             return false;
         }
 
-        /**
-         * Updates the repString given the current board and auxiliary information.
-         * Does not typically need to be overwritten by subgame.
-         * Assumes pieces and player names are represented as single characters. Override this function if that is not true for your game.
-         */
-        public updateRepString(): void {
+        /** Initializes the repString to a valid starting state */
+        protected initRepString(): void {
             let newRepString: string = "";
 
-            // Update board information.
-            for (let row = this.rows - 1; row >= 0; row--) {
+            for (let row = this.game.rows - 1; row >= 0; row--) {
                 let spaces = 0;
-                for (let col = 0; col < this.cols; col++) {
+                for (let col = 0; col < this.game.cols; col++) {
                     if (this.board[row][col] == " ") {
                         spaces++;
                     } else {
@@ -172,7 +235,50 @@ export function mixSuperGrid<
 
             // Update turn player information.
             newRepString += " ";
-            let curPlayer: string = this.repString.split(" ", 2)[1][0];
+            newRepString += this.playerOrder[0];
+
+            // Update auxiliary information.
+            for (let i = 0; i < this.auxiliary.length; i++) {
+                newRepString += " ";
+                newRepString += this.auxiliary[i];
+            }
+
+            this.game.repString = newRepString;
+        }
+
+        /**
+         * Updates the repString given the current board and auxiliary information.
+         * Does not typically need to be overwritten by subgame.
+         * Assumes pieces and player names are represented as single characters. Override this function if that is not true for your game.
+         */
+        protected updateRepString(): void {
+            let newRepString: string = "";
+
+            // Update board information.
+            for (let row = this.game.rows - 1; row >= 0; row--) {
+                let spaces = 0;
+                for (let col = 0; col < this.game.cols; col++) {
+                    if (this.board[row][col] == " ") {
+                        spaces++;
+                    } else {
+                        if (spaces != 0) {
+                            newRepString += spaces;
+                            spaces = 0;
+                        }
+                        newRepString += this.board[row][col];
+                    }
+                }
+                if (spaces != 0) {
+                    newRepString += spaces;
+                }
+                if (row != 0) {
+                    newRepString += "/";
+                }
+            }
+
+            // Update turn player information.
+            newRepString += " ";
+            let curPlayer: string = this.game.repString.split(" ", 2)[1][0];
             let curPlayerIndex: number = this.playerOrder.indexOf(curPlayer);
             let nextPlayerIndex: number =
                 (curPlayerIndex + 1) % this.playerOrder.length;
@@ -184,35 +290,41 @@ export function mixSuperGrid<
                 newRepString += this.auxiliary[i];
             }
 
-            this.repString = newRepString;
+            this.game.repString = newRepString;
         }
+    }
 
+    /** A super grid game AI. */
+    class SuperGridGameAI extends base.AI {
         /**
-         * Translates move notation from the sub-game into the standardized SuperGridMove object.
-         * Expected to be overwritten by subgame.
+         * This is called every time it is this AI.player's turn to make a move.
          *
-         * @param subMove - A string describing the move made in the sub-game's unique notation.
-         *
-         * @returns Move in standardized SuperGridMove object.
+         * @returns A string for the move you want to
+         * make. If the move is invalid or not properly formatted you will lose the
+         * game.
          */
-        public convertSubmoveToMove(subMove: string): SuperGridMove {
-            return new SuperGridMove();
+        public async makeMove(): Promise<string> {
+            return this.executeOrder("makeMove") as Promise<string>;
         }
+    }
 
-        /**
-         * Checks if the game should end.
-         * Expected to be overwritten by subgame.
-         *
-         * @returns A number. 0 if game is not over. Other values indicate how the game has ended via the gameOverMessages dictionary.
-         */
-        public isGameOver(): number {
-            return 1;
-        }
+    /** A super grid game. */
+    class SuperGridGame extends base.Game {
+        /** A string describing all of the information necessary to fully describe the game's state. */
+        public repString!: string;
+
+        /** The number of rows in the game. */
+        public readonly rows!: number;
+
+        /** The number of columns in the game. */
+        public readonly cols!: number;
     }
 
     return {
         ...base,
         GameSettings: SuperGridGameSettings,
         Game: SuperGridGame,
+        GameManager: SuperGridGameManager,
+        AI: SuperGridGameAI,
     };
 }
