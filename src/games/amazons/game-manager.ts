@@ -116,8 +116,44 @@ export class AmazonsGameManager extends BaseClasses.GameManager {
         // and the move end and placed end are empty
 
         // TODO: Check for queen movement rules
+        if (
+            move.endCol === null ||
+            move.endRow === null ||
+            move.startRow === null ||
+            move.startCol === null
+        ) {
+            return false;
+        }
+
+        let valid_bishop_move: boolean =
+            Math.abs(move.endCol - move.startCol) ==
+            Math.abs(move.endRow - move.startRow);
+
+        let valid_rook_move: boolean =
+            move.endRow == move.startRow || move.endCol == move.startCol;
+
+        let blocked: boolean = false;
+        const dRow = Math.sign(move.endRow - move.startRow);
+        const dCol = Math.sign(move.endCol - move.startCol);
+
+        let row = move.startRow + dRow;
+        let col = move.startCol + dCol;
+        while (row !== move.endRow || col !== move.endCol) {
+            if (this.board[row][col] !== " ") {
+                blocked = true;
+                break;
+            }
+            row += dRow;
+            col += dCol;
+        }
+
+        let queen_rules: boolean =
+            (valid_rook_move || valid_bishop_move) &&
+            !blocked &&
+            !(move.startCol == move.endCol && move.startRow == move.endRow);
 
         return (
+            queen_rules &&
             this.checkBounds(move.startRow, this.game.rows) &&
             this.checkBounds(move.startCol, this.game.cols) &&
             this.checkBounds(move.endRow, this.game.rows) &&
