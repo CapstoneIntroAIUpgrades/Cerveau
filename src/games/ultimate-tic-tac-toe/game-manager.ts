@@ -61,25 +61,29 @@ export class UltimateTicTacToeGameManager extends BaseClasses.GameManager {
     public readonly playerOrder: string[] = ["x", "o"];
 
     protected transition(move: SuperGridMove, player: SuperGridPlayer): boolean {
-        if (this.board[move.placeRow][move.placeCol] != " ") return false;
-        if (this.auxiliary[0] != "0"
-            && parseInt(this.auxiliary[0]) != getSubgameIndex(move.placeRow, move.placeCol))
+        if (move.placedPiece !== player.piece) return false;
+        if (move.placeRow == null || move.placeRow < 0 || move.placeRow >= this.game.rows
+            || move.placeCol == null || move.placeCol < 0 || move.placeCol >= this.game.cols)
+            return false;
+        if (this.board[move.placeRow][move.placeCol] !== " ") return false;
+        if (this.auxiliary[0] !== "0"
+            && parseInt(this.auxiliary[0]) !== getSubgameIndex(move.placeRow, move.placeCol))
             return false;
         
-        this.board[move.placeRow][move.placeCol] = player.piece;
+        this.board[move.placeRow][move.placeCol] = move.placedPiece;
 
         (r, c) = getSubgameCenter(i);
         status = isSubgameWon(getSubgameIndex(move.placeRow, move.placeCol))
-        if (status != "") {
-            for (int x=-1; x<2; x++) {
-                for (int y=-1; y<2; y++) {
+        if (status !== "" && status !== "=") {
+            for (let x=-1; x<2; x++) {
+                for (let y=-1; y<2; y++) {
                     this.board[r+x][c+y] = status;
                 }
             }
         }
 
         nextSubgame = (move.placeCol - c+1) + 3*(move.placeRow - r+1) + 1
-        if (isSubgameWon(nextSubgame) != "") this.auxiliary[0] = "0";
+        if (isSubgameWon(nextSubgame) !== "") this.auxiliary[0] = "0";
         else this.auxiliary[0] = nextSubgame.toString();
 
         return true;
@@ -89,19 +93,10 @@ export class UltimateTicTacToeGameManager extends BaseClasses.GameManager {
         (r, c) = getSubgameCenter(i);
         b = this.board;
         if (b[r-1][c-1] === b[r-1][c] && b[r-1][c] === b[r-1][c+1]) return b[r-1][c-1];
-        if (b[r][c-1] === b[r][c] && b[r][c] === b[r][c+1]) return b[r][c-1];
-        if (b[r+1][c-1] === b[r+1][c] && b[r+1][c] === b[r+1][c+1]) return b[r+1][c-1];
-        
-        if (b[r-1][c-1] === b[r][c-1] && b[r][c-1] === b[r+1][c-1]) return b[r-1][c-1];
-        if (b[r-1][c] === b[r][c] && b[r][c] === b[r+1][c]) return b[r-1][c];
-        if (b[r-1][c+1] === b[r][c+1] && b[r][c+1] === b[r+1][c+1]) return b[r-1][c+1];
-        
-        if (b[r-1][c-1] === b[r][c] && b[r][c] === b[r+1][c+1]) return b[r-1][c-1];
-        if (b[r-1][c+1] === b[r][c] && b[r][c] === b[r+1][c-1]) return b[r-1][c+1];
 
-        for (int x=-1; x<2; x++) {
-            for (int y=-1; y<2; y++) {
-                if b[r+x][c+y] === " " return "";
+        for (let x=-1; x<2; x++) {
+            for (let y=-1; y<2; y++) {
+                if (b[r+x][c+y] === " ") return "";
             }
         }
         
@@ -109,14 +104,111 @@ export class UltimateTicTacToeGameManager extends BaseClasses.GameManager {
     }
       
 
-    protected getSubgameCenter(i: number): (number, number) {
-        return ( Math.trunc((i-1) / 3) * 3 + 1, ((i-1) % 3) * 3 + 1);
+    protected getSubgameCenter(i: number): [number, number] {
+        return [ Math.trunc((i-1) / 3) * 3 + 1, ((i-1) % 3) * 3 + 1 ];
     }
     
     protected getSubgameIndex(row: number, col: number): number {
-        sgCol = col / 3;
-        sgRow = Math.trunc(row / 3);
+        let sgCol = col / 3;
+        let sgRow = Math.trunc(row / 3);
         return sgCol + 3 * sgRow + 1;
+    }
+
+    protected convertSubmoveToMove(subMove: string): SuperGridMove {
+        // Split string to string[] then cast each element to int
+        const parts: number[] = subMove
+            .split(" ")
+            .map((str) => Number.parseInt(str));
+        return new SuperGridMove(
+            null,
+            null,
+            null,
+            null,
+            player.piece,
+            parts[0],
+            parts[1],
+        );
+    }
+    protected getGameOverCode(): number {
+        for (let r = 0; r < this.game.rows; r++) {
+            let eq = true
+            if (this.board[r][0] === " ") continue;
+            for (let c = 1; c < this.game.cols; c++) {
+                eq = eq && this.board[r][c-1] === this.board[r][c];
+            }
+            if (eq) return (playerOrder.indexOf(this.board[r][0]) + 1);
+        }
+
+        for (let c = 0; c < this.game.cols; c++) {
+            let eq = true
+            if (this.board[0][c] === " ") continue;
+            for (let r = 1; r < this.game.rows; r++) {
+                eq = eq && this.board[r-1][c] === this.board[r][c];
+            }
+            if (eq) return (playerOrder.indexOf(this.board[0][c]) + 1);
+        }
+
+        let eqDpos = true;
+        if (this.board[0][0] !== " ") {
+            for (let i = 1; i < this.game.rows; i++) { // requires game is square
+                eqDpos = eqDpos && this.board[i-1][i-1] === this.board[i][i];
+            }
+            if (eqDpos) return (playerOrder.indexOf(this.board[0][0]) + 1);
+        }
+
+        let eqDneg = true;
+        if (this.board[this.game.rows-1][0] !== " ") {
+            for (let i = 1; i < this.game.rows; i++) { // requires game is square
+                eqDneg = eqDneg && this.board[this.game.rows - i][i-1] === this.board[this.game.rows - i - 1][i];
+            }
+            if (eqDneg) return (playerOrder.indexOf(this.board[0][0]) + 1);
+        }
+
+        for (let r = 0; r < this.game.rows; r++) {
+            for (let c = 0; c < this.game.cols; c++) {
+                if (this.board[r][c] == " ") return 0;
+            }
+        }
+
+        return 3;
+    }
+
+    protected declareWinnersAndLosers(gameOverCode: number): void {
+        const winners: Player[] = [];
+        const losers: Player[] = [];
+        switch (gameOverCode) {
+            case 1: {
+                // Player 1 wins
+                winners.push(this.game.players[0]);
+                losers.push(this.game.players[1]);
+                break;
+            }
+            case 2: {
+                // Player 2 wins
+                winners.push(this.game.players[1]);
+                losers.push(this.game.players[0]);
+                break;
+            }
+            case 3: {
+                // Draw
+                losers.push(...this.game.players);
+                break;
+            }
+            case 4: {
+                // Player 1 submitted invalid move
+                winners.push(this.game.players[1]);
+                losers.push(this.game.players[0]);
+                break;
+            }
+            case 5: {
+                // Player 2 submitted invalid move
+                winners.push(this.game.players[0]);
+                losers.push(this.game.players[1]);
+                break;
+            }
+        }
+        this.declareWinners(this.gameOverMessages[gameOverCode], ...winners);
+        this.declareLosers(this.gameOverMessages[gameOverCode], ...losers);
     }
     
     // <<-- /Creer-Merge: protected-private-methods -->>
