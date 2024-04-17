@@ -1,10 +1,6 @@
 // This file is where you should put logic to control the game and everything
 // around it.
-import {
-    BaseClasses,
-    ConnectFourGame,
-    ConnectFourGameObjectFactory,
-} from "./";
+import { BaseClasses, ConnectFourGame, ConnectFourGameObjectFactory } from ".";
 
 // <<-- Creer-Merge: imports -->>
 import { SuperGridMove, SuperGridPlayer } from "~/core/game";
@@ -57,22 +53,32 @@ export class ConnectFourGameManager extends BaseClasses.GameManager {
         5: "Player 2 submitted an invalid move",
     };
 
-    public readonly playerOrder: string[] = ["red", "yellow"];
+    public readonly playerOrder: string[] = ["r", "y"];
 
-    /** ConnectFour move is "<r|y> <row> <col>" */
+    /** ConnectFour move is "<r|y> <col>" */
     protected convertSubmoveToMove(subMove: string): SuperGridMove {
         // Split string to string[] then cast last element to int
-        const parts: string[] = subMove
-            .split(" ");
+        const parts: string[] = subMove.split(" ");
         return new SuperGridMove(
             null,
             null,
             null,
             null,
             parts[0],
+            this.getRowFromCol(Number.parseInt(parts[1])),
             Number.parseInt(parts[1]),
-            Number.parseInt(parts[2]),
         );
+    }
+
+    /** Gets the row from a col. "Gravity" */
+    protected getRowFromCol(col: number): number {
+        let row = -1;
+        for (let i = 0; i < this.game.rows; i++) {
+            if (this.board[i][col] == " ") {
+                row = i;
+            }
+        }
+        return row;
     }
 
     protected transition(
@@ -90,10 +96,20 @@ export class ConnectFourGameManager extends BaseClasses.GameManager {
         // Update board
         // We've already made sure that the positions are valid
         this.board[move.placeRow!][move.placeCol!] = move.placedPiece!;
+        //this.prettyPrintBoard();
 
         // No Aux to update
 
         return true;
+    }
+
+    protected prettyPrintBoard(): void {
+        let x = "";
+        console.log(" 0 1 2 3 4 5 6");
+        this.board.forEach((line) => {
+            x = line.join("|");
+            console.log("|" + x + "|");
+        });
     }
 
     protected checkBounds(val: number | null, upperBound: number): boolean {
@@ -102,16 +118,15 @@ export class ConnectFourGameManager extends BaseClasses.GameManager {
 
     /* A valid space must be in bounds, blank, and the space below it must be "r", "y", or out of bounds */
     protected isValidEmptySpace(row: number, col: number): boolean {
-            return (
-                this.checkBounds(row, this.game.rows) &&
-                this.checkBounds(col, this.game.cols) &&
-                this.board[row][col] == " " && (
-                    !this.checkBounds(row+1, this.game.rows) ||
-                    this.board[row+1][col] == "r" ||
-                    this.board[row+1][col] == "y"
-                )
-            );
-        }
+        return (
+            this.checkBounds(row, this.game.rows) &&
+            this.checkBounds(col, this.game.cols) &&
+            this.board[row][col] == " " &&
+            (!this.checkBounds(row + 1, this.game.rows) ||
+                this.board[row + 1][col] == "r" ||
+                this.board[row + 1][col] == "y")
+        );
+    }
 
     protected validateMove(move: SuperGridMove, player: Player): boolean {
         // Check that all attributes of the move are in-bounds,
@@ -119,7 +134,10 @@ export class ConnectFourGameManager extends BaseClasses.GameManager {
         // and the placed end is empty
         return (
             move.placedPiece == player.color &&
-            this.isValidEmptySpace(move.placeRow as number, move.placeCol as number)
+            this.isValidEmptySpace(
+                move.placeRow as number,
+                move.placeCol as number,
+            )
         );
     }
 
@@ -136,42 +154,237 @@ export class ConnectFourGameManager extends BaseClasses.GameManager {
     protected checkWinCondition(): string {
         // return values = {"", "r", "y"}
         // verticals
-        let v1 = [[0, 0], [1, 0], [2, 0], [3, 0], [4, 0], [5, 0]];
-        let v2 = [[0, 1], [1, 1], [2, 1], [3, 1], [4, 1], [5, 1]];
-        let v3 = [[0, 2], [1, 2], [2, 2], [3, 2], [4, 2], [5, 2]];
-        let v4 = [[0, 3], [1, 3], [2, 3], [3, 3], [4, 3], [5, 3]];
-        let v5 = [[0, 4], [1, 4], [2, 4], [3, 4], [4, 4], [5, 4]];
-        let v6 = [[0, 5], [1, 5], [2, 5], [3, 5], [4, 5], [5, 5]];
-        let v7 = [[0, 6], [1, 6], [2, 6], [3, 6], [4, 6], [5, 6]];
+        let v1 = [
+            [0, 0],
+            [1, 0],
+            [2, 0],
+            [3, 0],
+            [4, 0],
+            [5, 0],
+        ];
+        let v2 = [
+            [0, 1],
+            [1, 1],
+            [2, 1],
+            [3, 1],
+            [4, 1],
+            [5, 1],
+        ];
+        let v3 = [
+            [0, 2],
+            [1, 2],
+            [2, 2],
+            [3, 2],
+            [4, 2],
+            [5, 2],
+        ];
+        let v4 = [
+            [0, 3],
+            [1, 3],
+            [2, 3],
+            [3, 3],
+            [4, 3],
+            [5, 3],
+        ];
+        let v5 = [
+            [0, 4],
+            [1, 4],
+            [2, 4],
+            [3, 4],
+            [4, 4],
+            [5, 4],
+        ];
+        let v6 = [
+            [0, 5],
+            [1, 5],
+            [2, 5],
+            [3, 5],
+            [4, 5],
+            [5, 5],
+        ];
+        let v7 = [
+            [0, 6],
+            [1, 6],
+            [2, 6],
+            [3, 6],
+            [4, 6],
+            [5, 6],
+        ];
         // slash
-        let s1 = [[0, 3], [1, 2], [2, 1], [3, 0]];
-        let s2 = [[0, 4], [1, 3], [2, 2], [3, 1], [4, 0]];
-        let s3 = [[0, 5], [1, 4], [2, 3], [3, 2], [4, 1], [5, 0]];
-        let s4 = [[0, 6], [1, 5], [2, 4], [3, 3], [4, 2], [5, 1]];
-        let s5 = [[1, 6], [2, 5], [3, 4], [4, 3], [5, 2]];
-        let s6 = [[2, 6], [3, 5], [4, 4], [5, 3]];
+        let s1 = [
+            [0, 3],
+            [1, 2],
+            [2, 1],
+            [3, 0],
+        ];
+        let s2 = [
+            [0, 4],
+            [1, 3],
+            [2, 2],
+            [3, 1],
+            [4, 0],
+        ];
+        let s3 = [
+            [0, 5],
+            [1, 4],
+            [2, 3],
+            [3, 2],
+            [4, 1],
+            [5, 0],
+        ];
+        let s4 = [
+            [0, 6],
+            [1, 5],
+            [2, 4],
+            [3, 3],
+            [4, 2],
+            [5, 1],
+        ];
+        let s5 = [
+            [1, 6],
+            [2, 5],
+            [3, 4],
+            [4, 3],
+            [5, 2],
+        ];
+        let s6 = [
+            [2, 6],
+            [3, 5],
+            [4, 4],
+            [5, 3],
+        ];
         // horizontals
-        let h1 = [[0, 0], [0, 1], [0, 2], [0, 3], [0, 4], [0, 5], [0, 6]];
-        let h2 = [[1, 0], [1, 1], [1, 2], [1, 3], [1, 4], [1, 5], [1, 6]];
-        let h3 = [[2, 0], [2, 1], [2, 2], [2, 3], [2, 4], [2, 5], [2, 6]];
-        let h4 = [[3, 0], [3, 1], [3, 2], [3, 3], [3, 4], [3, 5], [3, 6]];
-        let h5 = [[4, 0], [4, 1], [4, 2], [4, 3], [4, 4], [4, 5], [4, 6]];
-        let h6 = [[5, 0], [5, 1], [5, 2], [5, 3], [5, 4], [5, 5], [5, 6]];
+        let h1 = [
+            [0, 0],
+            [0, 1],
+            [0, 2],
+            [0, 3],
+            [0, 4],
+            [0, 5],
+            [0, 6],
+        ];
+        let h2 = [
+            [1, 0],
+            [1, 1],
+            [1, 2],
+            [1, 3],
+            [1, 4],
+            [1, 5],
+            [1, 6],
+        ];
+        let h3 = [
+            [2, 0],
+            [2, 1],
+            [2, 2],
+            [2, 3],
+            [2, 4],
+            [2, 5],
+            [2, 6],
+        ];
+        let h4 = [
+            [3, 0],
+            [3, 1],
+            [3, 2],
+            [3, 3],
+            [3, 4],
+            [3, 5],
+            [3, 6],
+        ];
+        let h5 = [
+            [4, 0],
+            [4, 1],
+            [4, 2],
+            [4, 3],
+            [4, 4],
+            [4, 5],
+            [4, 6],
+        ];
+        let h6 = [
+            [5, 0],
+            [5, 1],
+            [5, 2],
+            [5, 3],
+            [5, 4],
+            [5, 5],
+            [5, 6],
+        ];
         // backslash
-        let b1 = [[2, 0], [3, 1], [4, 2], [5, 3]];
-        let b2 = [[1, 0], [2, 1], [3, 2], [4, 3], [5, 4]];
-        let b3 = [[0, 0], [1, 1], [2, 2], [3, 3], [4, 4], [5, 5]];
-        let b4 = [[0, 1], [1, 2], [2, 3], [3, 4], [4, 5], [5, 6]];
-        let b5 = [[0, 2], [1, 3], [2, 4], [3, 5], [4, 6]];
-        let b6 = [[0, 3], [1, 4], [2, 5], [3, 6]];
+        let b1 = [
+            [2, 0],
+            [3, 1],
+            [4, 2],
+            [5, 3],
+        ];
+        let b2 = [
+            [1, 0],
+            [2, 1],
+            [3, 2],
+            [4, 3],
+            [5, 4],
+        ];
+        let b3 = [
+            [0, 0],
+            [1, 1],
+            [2, 2],
+            [3, 3],
+            [4, 4],
+            [5, 5],
+        ];
+        let b4 = [
+            [0, 1],
+            [1, 2],
+            [2, 3],
+            [3, 4],
+            [4, 5],
+            [5, 6],
+        ];
+        let b5 = [
+            [0, 2],
+            [1, 3],
+            [2, 4],
+            [3, 5],
+            [4, 6],
+        ];
+        let b6 = [
+            [0, 3],
+            [1, 4],
+            [2, 5],
+            [3, 6],
+        ];
 
-        let all_paths = [v1, v2, v3, v4, v5, v6, v7, s1, s2, s3, s4, s5, s6, h1, h2, h3, h4, h5, h6, b1, b2, b3, b4, b5, b6];
-        all_paths.forEach((path) => {
+        let all_paths = [
+            v1,
+            v2,
+            v3,
+            v4,
+            v5,
+            v6,
+            v7,
+            s1,
+            s2,
+            s3,
+            s4,
+            s5,
+            s6,
+            h1,
+            h2,
+            h3,
+            h4,
+            h5,
+            h6,
+            b1,
+            b2,
+            b3,
+            b4,
+            b5,
+            b6,
+        ];
+        for (let path of all_paths) {
             let count_r = 0;
             let longest_r = 0;
             let count_y = 0;
             let longest_y = 0;
-            path.forEach((point) => {
+            for (let point of path) {
                 if (this.board[point[0]][point[1]] == "r") {
                     count_r = count_r + 1;
                     longest_r = this.max(longest_r, count_r);
@@ -184,14 +397,14 @@ export class ConnectFourGameManager extends BaseClasses.GameManager {
                 } else {
                     count_y = 0;
                 }
-            });
+            }
             if (longest_r >= 4) {
                 return "r";
             }
             if (longest_y >= 4) {
                 return "y";
             }
-        });
+        }
         return "";
     }
 
@@ -211,7 +424,7 @@ export class ConnectFourGameManager extends BaseClasses.GameManager {
                 }
             }
         }
-        let win_con = this.checkWinCondition()
+        let win_con = this.checkWinCondition();
         if (win_con != "") {
             // assign winner
             if (win_con == "r") {

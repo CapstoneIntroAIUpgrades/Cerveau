@@ -1,5 +1,5 @@
 import { BaseGameObjectRequiredData } from "~/core/game";
-import { MoveConstructorArgs } from "./";
+import { MoveConstructorArgs } from ".";
 import { GameObject } from "./game-object";
 
 // <<-- Creer-Merge: imports -->>

@@ -1,6 +1,6 @@
 import { SettingsFromSchema } from "~/core/game/base/base-game-settings";
 import { UnknownObject } from "~/utils";
-import { BaseClasses } from "./";
+import { BaseClasses } from ".";
 
 // <<-- Creer-Merge: imports -->>
 // any additional imports you want can be placed here safely between creer runs

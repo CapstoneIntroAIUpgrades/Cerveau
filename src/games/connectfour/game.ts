@@ -1,5 +1,5 @@
 import { BaseGameRequiredData } from "~/core/game";
-import { BaseClasses } from "./";
+import { BaseClasses } from ".";
 import { ConnectFourGameManager } from "./game-manager";
 import { GameObject } from "./game-object";
 import { ConnectFourGameSettingsManager } from "./game-settings";
@@ -75,8 +75,8 @@ export class ConnectFourGame extends BaseClasses.Game {
         super(settingsManager, required);
 
         // <<-- Creer-Merge: constructor -->>
-        (this.players[0] as MutablePlayer).piece = "r";
-        (this.players[1] as MutablePlayer).piece = "y";
+        (this.players[0] as MutablePlayer).color = "r";
+        (this.players[1] as MutablePlayer).color = "y";
         // <<-- /Creer-Merge: constructor -->>
     }
 

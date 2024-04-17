@@ -1,5 +1,5 @@
 import { BaseGameObjectRequiredData } from "~/core/game";
-import { BaseConnectFourPlayer, PlayerConstructorArgs } from "./";
+import { BaseConnectFourPlayer, PlayerConstructorArgs } from ".";
 import { AI } from "./ai";
 import { GameObject } from "./game-object";
 
@@ -28,7 +28,7 @@ export class Player extends GameObject implements BaseConnectFourPlayer {
 
     /**
      * The color (side) of this player. Either 'red' or 'yellow', with
-     * the 'yellow' player having the first move.
+     * the 'red' player having the first move.
      */
     public readonly color!: "r" | "y";
 
