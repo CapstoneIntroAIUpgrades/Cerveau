@@ -64,7 +64,7 @@ export class ConnectFourGameManager extends BaseClasses.GameManager {
             null,
             null,
             null,
-            parts[0],
+            this.game.repString.split(" ", 2)[1][0],
             this.getRowFromCol(Number.parseInt(parts[1])),
             Number.parseInt(parts[1]),
         );

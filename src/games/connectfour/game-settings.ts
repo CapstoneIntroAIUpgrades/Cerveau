@@ -27,12 +27,14 @@ export class ConnectFourGameSettingsManager extends BaseClasses.GameSettings {
             cols: {
                 default: 7,
                 min: 7,
+                max: 7,
                 description:
                     "The number of cells on the board along the x (horizontal) axis.",
             },
             rows: {
                 default: 6,
                 min: 6,
+                max: 6,
                 description:
                     "The number of cells on the board along the y (vertical) axis.",
             },
