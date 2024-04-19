@@ -55,18 +55,16 @@ export class ConnectFourGameManager extends BaseClasses.GameManager {
 
     public readonly playerOrder: string[] = ["r", "y"];
 
-    /** ConnectFour move is "<r|y> <col>" */
+    /** ConnectFour move is "<col>" */
     protected convertSubmoveToMove(subMove: string): SuperGridMove {
-        // Split string to string[] then cast last element to int
-        const parts: string[] = subMove.split(" ");
         return new SuperGridMove(
             null,
             null,
             null,
             null,
             this.game.repString.split(" ", 2)[1][0],
-            this.getRowFromCol(Number.parseInt(parts[1])),
-            Number.parseInt(parts[1]),
+            this.getRowFromCol(Number.parseInt(subMove)),
+            Number.parseInt(subMove),
         );
     }
 
