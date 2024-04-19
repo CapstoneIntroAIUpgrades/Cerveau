@@ -1,6 +1,6 @@
 import { SettingsFromSchema } from "~/core/game/base/base-game-settings";
 import { UnknownObject } from "~/utils";
-import { BaseClasses } from "./";
+import { BaseClasses } from ".";
 
 // <<-- Creer-Merge: imports -->>
 // any additional imports you want can be placed here safely between creer runs
@@ -24,14 +24,20 @@ export class UltimateTicTacToeGameSettingsManager extends BaseClasses.GameSettin
             // UltimateTicTacToe game specific settings
             // <<-- Creer-Merge: schema -->>
 
-            // you can add more settings here, e.g.:
-            /*
-            someVariableLikeUnitHealth: {
-                description: "Describe what this does for the players.",
-                default: 1337,
-                min: 1,
+            cols: {
+                default: 9,
+                min: 9,
+                max: 9,
+                description:
+                    "The number of cells on the board along the x (horizontal) axis.",
             },
-            */
+            rows: {
+                default: 9,
+                min: 9,
+                max: 9,
+                description:
+                    "The number of cells on the board along the y (vertical) axis.",
+            },
 
             // <<-- /Creer-Merge: schema -->>
 

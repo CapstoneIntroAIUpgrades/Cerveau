@@ -1,5 +1,5 @@
 import { BaseGameObjectRequiredData } from "~/core/game";
-import { BaseClasses, GameObjectConstructorArgs } from "./";
+import { BaseClasses, GameObjectConstructorArgs } from ".";
 import { UltimateTicTacToeGame } from "./game";
 import { UltimateTicTacToeGameManager } from "./game-manager";
 

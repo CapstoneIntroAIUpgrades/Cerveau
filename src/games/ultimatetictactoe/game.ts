@@ -1,12 +1,15 @@
 import { BaseGameRequiredData } from "~/core/game";
-import { BaseClasses } from "./";
+import { BaseClasses } from ".";
 import { UltimateTicTacToeGameManager } from "./game-manager";
 import { GameObject } from "./game-object";
 import { UltimateTicTacToeGameSettingsManager } from "./game-settings";
 import { Player } from "./player";
 
 // <<-- Creer-Merge: imports -->>
-// any additional imports you want can be placed here safely between creer runs
+import { Mutable } from "~/utils";
+
+/** A player that can be mutated BEFORE the game starts. */
+type MutablePlayer = Mutable<Player>;
 // <<-- /Creer-Merge: imports -->>
 
 /**
@@ -72,7 +75,8 @@ export class UltimateTicTacToeGame extends BaseClasses.Game {
         super(settingsManager, required);
 
         // <<-- Creer-Merge: constructor -->>
-        // setup any thing you need here
+        (this.players[0] as MutablePlayer).piece = "x";
+        (this.players[1] as MutablePlayer).piece = "o";
         // <<-- /Creer-Merge: constructor -->>
     }
 

@@ -1,5 +1,5 @@
 import { BaseGameObjectRequiredData } from "~/core/game";
-import { BaseUltimateTicTacToePlayer, PlayerConstructorArgs } from "./";
+import { BaseUltimateTicTacToePlayer, PlayerConstructorArgs } from ".";
 import { AI } from "./ai";
 import { GameObject } from "./game-object";
 

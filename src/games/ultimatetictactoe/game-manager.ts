@@ -4,10 +4,11 @@ import {
     BaseClasses,
     UltimateTicTacToeGame,
     UltimateTicTacToeGameObjectFactory,
-} from "./";
+} from ".";
 
 // <<-- Creer-Merge: imports -->>
-// any additional imports you want can be placed here safely between creer runs
+import { SuperGridMove, SuperGridPlayer } from "~/core/game";
+import { Player } from "./player";
 // <<-- /Creer-Merge: imports -->>
 
 /**
@@ -60,20 +61,26 @@ export class UltimateTicTacToeGameManager extends BaseClasses.GameManager {
 
     public readonly playerOrder: string[] = ["x", "o"];
 
+    protected setInitialBoardState(): void {
+        this.auxiliary[0] = "0";
+    }
+
     protected transition(move: SuperGridMove, player: SuperGridPlayer): boolean {
-        if (move.placedPiece !== player.piece) return false;
+        const ultimateTicTacToePlayer = player as Player;
+        if (move.placedPiece !== ultimateTicTacToePlayer.piece) return false;
         if (move.placeRow == null || move.placeRow < 0 || move.placeRow >= this.game.rows
             || move.placeCol == null || move.placeCol < 0 || move.placeCol >= this.game.cols)
             return false;
         if (this.board[move.placeRow][move.placeCol] !== " ") return false;
         if (this.auxiliary[0] !== "0"
-            && parseInt(this.auxiliary[0]) !== getSubgameIndex(move.placeRow, move.placeCol))
+            && parseInt(this.auxiliary[0]) !== this.getSubgameIndex(move.placeRow, move.placeCol))
             return false;
         
-        this.board[move.placeRow][move.placeCol] = move.placedPiece;
+        this.board[move.placeRow!][move.placeCol!] = move.placedPiece!;
+        //this.prettyPrintBoard();
 
-        (r, c) = getSubgameCenter(i);
-        status = isSubgameWon(getSubgameIndex(move.placeRow, move.placeCol))
+        let [r, c] = this.getSubgameCenter(this.getSubgameIndex(move.placeRow, move.placeCol));
+        let status = this.isSubgameWon(this.getSubgameIndex(move.placeRow, move.placeCol))
         if (status !== "" && status !== "=") {
             for (let x=-1; x<2; x++) {
                 for (let y=-1; y<2; y++) {
@@ -82,16 +89,31 @@ export class UltimateTicTacToeGameManager extends BaseClasses.GameManager {
             }
         }
 
-        nextSubgame = (move.placeCol - c+1) + 3*(move.placeRow - r+1) + 1
-        if (isSubgameWon(nextSubgame) !== "") this.auxiliary[0] = "0";
+        let nextSubgame = (move.placeCol - c+1) + 3*(move.placeRow - r+1) + 1;
+        if (this.isSubgameWon(nextSubgame) !== "") this.auxiliary[0] = "0";
         else this.auxiliary[0] = nextSubgame.toString();
 
         return true;
     }
 
+    protected prettyPrintBoard(): void {
+        for (let i = 8; i > 5; i--) {
+            console.log(i + " " + this.board[i].slice(0, 3).join("") + "|" + this.board[i].slice(3, 6).join("") + "|" + this.board[i].slice(6, 9).join(""));
+        }
+        console.log("  ---+---+---");
+        for (let i = 5; i > 2; i--) {
+            console.log(i + " " + this.board[i].slice(0, 3).join("") + "|" + this.board[i].slice(3, 6).join("") + "|" + this.board[i].slice(6, 9).join(""));
+        }
+        console.log("  ---+---+---");
+        for (let i = 2; i > -1; i--) {
+            console.log(i + " " + this.board[i].slice(0, 3).join("") + "|" + this.board[i].slice(3, 6).join("") + "|" + this.board[i].slice(6, 9).join(""));
+        }
+        console.log("  012 345 678");
+    }
+
     protected isSubgameWon(i: number): string {
-        (r, c) = getSubgameCenter(i);
-        b = this.board;
+        let [r, c] = this.getSubgameCenter(i);
+        let b = this.board;
         if (b[r-1][c-1] === b[r-1][c] && b[r-1][c] === b[r-1][c+1]) return b[r-1][c-1];
 
         for (let x=-1; x<2; x++) {
@@ -124,28 +146,28 @@ export class UltimateTicTacToeGameManager extends BaseClasses.GameManager {
             null,
             null,
             null,
-            player.piece,
+            this.game.repString.split(" ", 2)[1][0],
             parts[0],
             parts[1],
         );
     }
     protected getGameOverCode(): number {
         for (let r = 0; r < this.game.rows; r++) {
-            let eq = true
+            let eq = true;
             if (this.board[r][0] === " ") continue;
             for (let c = 1; c < this.game.cols; c++) {
                 eq = eq && this.board[r][c-1] === this.board[r][c];
             }
-            if (eq) return (playerOrder.indexOf(this.board[r][0]) + 1);
+            if (eq) return (this.playerOrder.indexOf(this.board[r][0]) + 1);
         }
 
         for (let c = 0; c < this.game.cols; c++) {
-            let eq = true
+            let eq = true;
             if (this.board[0][c] === " ") continue;
             for (let r = 1; r < this.game.rows; r++) {
                 eq = eq && this.board[r-1][c] === this.board[r][c];
             }
-            if (eq) return (playerOrder.indexOf(this.board[0][c]) + 1);
+            if (eq) return (this.playerOrder.indexOf(this.board[0][c]) + 1);
         }
 
         let eqDpos = true;
@@ -153,7 +175,7 @@ export class UltimateTicTacToeGameManager extends BaseClasses.GameManager {
             for (let i = 1; i < this.game.rows; i++) { // requires game is square
                 eqDpos = eqDpos && this.board[i-1][i-1] === this.board[i][i];
             }
-            if (eqDpos) return (playerOrder.indexOf(this.board[0][0]) + 1);
+            if (eqDpos) return (this.playerOrder.indexOf(this.board[0][0]) + 1);
         }
 
         let eqDneg = true;
@@ -161,7 +183,7 @@ export class UltimateTicTacToeGameManager extends BaseClasses.GameManager {
             for (let i = 1; i < this.game.rows; i++) { // requires game is square
                 eqDneg = eqDneg && this.board[this.game.rows - i][i-1] === this.board[this.game.rows - i - 1][i];
             }
-            if (eqDneg) return (playerOrder.indexOf(this.board[0][0]) + 1);
+            if (eqDneg) return (this.playerOrder.indexOf(this.board[0][0]) + 1);
         }
 
         for (let r = 0; r < this.game.rows; r++) {
