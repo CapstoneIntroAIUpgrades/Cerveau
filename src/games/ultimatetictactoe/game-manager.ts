@@ -77,7 +77,6 @@ export class UltimateTicTacToeGameManager extends BaseClasses.GameManager {
             return false;
         
         this.board[move.placeRow!][move.placeCol!] = move.placedPiece!;
-        //this.prettyPrintBoard();
 
         let [r, c] = this.getSubgameCenter(this.getSubgameIndex(move.placeRow, move.placeCol));
         let status = this.isSubgameWon(this.getSubgameIndex(move.placeRow, move.placeCol))
@@ -93,28 +92,37 @@ export class UltimateTicTacToeGameManager extends BaseClasses.GameManager {
         if (this.isSubgameWon(nextSubgame) !== "") this.auxiliary[0] = "0";
         else this.auxiliary[0] = nextSubgame.toString();
 
+        //this.prettyPrintBoard();
+
         return true;
     }
 
     protected prettyPrintBoard(): void {
         for (let i = 8; i > 5; i--) {
-            console.log(i + " " + this.board[i].slice(0, 3).join("") + "|" + this.board[i].slice(3, 6).join("") + "|" + this.board[i].slice(6, 9).join(""));
+            console.log((i + 1) + " " + this.board[i].slice(0, 3).join("") + "|" + this.board[i].slice(3, 6).join("") + "|" + this.board[i].slice(6, 9).join(""));
         }
         console.log("  ---+---+---");
         for (let i = 5; i > 2; i--) {
-            console.log(i + " " + this.board[i].slice(0, 3).join("") + "|" + this.board[i].slice(3, 6).join("") + "|" + this.board[i].slice(6, 9).join(""));
+            console.log((i + 1) + " " + this.board[i].slice(0, 3).join("") + "|" + this.board[i].slice(3, 6).join("") + "|" + this.board[i].slice(6, 9).join(""));
         }
         console.log("  ---+---+---");
         for (let i = 2; i > -1; i--) {
-            console.log(i + " " + this.board[i].slice(0, 3).join("") + "|" + this.board[i].slice(3, 6).join("") + "|" + this.board[i].slice(6, 9).join(""));
+            console.log((i + 1) + " " + this.board[i].slice(0, 3).join("") + "|" + this.board[i].slice(3, 6).join("") + "|" + this.board[i].slice(6, 9).join(""));
         }
-        console.log("  012 345 678");
+        console.log("  abc def ghi");
     }
 
     protected isSubgameWon(i: number): string {
         let [r, c] = this.getSubgameCenter(i);
         let b = this.board;
-        if (b[r-1][c-1] === b[r-1][c] && b[r-1][c] === b[r-1][c+1]) return b[r-1][c-1];
+        if (b[r-1][c-1] !== " " && b[r-1][c-1] === b[r-1][c] && b[r-1][c] === b[r-1][c+1]) return b[r-1][c-1];
+        if (b[r][c-1] !== " " && b[r][c-1] === b[r][c] && b[r][c] === b[r][c+1]) return b[r][c-1];
+        if (b[r+1][c-1] !== " " && b[r+1][c-1] === b[r+1][c] && b[r+1][c] === b[r+1][c+1]) return b[r+1][c-1];
+        if (b[r-1][c-1] !== " " && b[r-1][c-1] === b[r][c-1] && b[r][c-1] === b[r+1][c-1]) return b[r-1][c-1];
+        if (b[r-1][c] !== " " && b[r-1][c] === b[r][c] && b[r][c] === b[r+1][c]) return b[r-1][c];
+        if (b[r-1][c+1] !== " " && b[r-1][c+1] === b[r][c+1] && b[r][c+1] === b[r+1][c+1]) return b[r-1][c+1];
+        if (b[r][c] !== " " && b[r-1][c-1] === b[r][c] && b[r][c] === b[r+1][c+1]) return b[r][c];
+        if (b[r][c] !== " " && b[r-1][c+1] === b[r][c] && b[r][c] === b[r+1][c-1]) return b[r][c];
 
         for (let x=-1; x<2; x++) {
             for (let y=-1; y<2; y++) {
@@ -131,24 +139,23 @@ export class UltimateTicTacToeGameManager extends BaseClasses.GameManager {
     }
     
     protected getSubgameIndex(row: number, col: number): number {
-        let sgCol = col / 3;
+        let sgCol = Math.trunc(col / 3);
         let sgRow = Math.trunc(row / 3);
         return sgCol + 3 * sgRow + 1;
     }
 
     protected convertSubmoveToMove(subMove: string): SuperGridMove {
         // Split string to string[] then cast each element to int
-        const parts: number[] = subMove
-            .split(" ")
-            .map((str) => Number.parseInt(str));
+        let rowStr = "123456789";
+	let colStr = "abcdefghi";
         return new SuperGridMove(
             null,
             null,
             null,
             null,
             this.game.repString.split(" ", 2)[1][0],
-            parts[0],
-            parts[1],
+            rowStr.indexOf(subMove[1]),
+            colStr.indexOf(subMove[0]),
         );
     }
     protected getGameOverCode(): number {
