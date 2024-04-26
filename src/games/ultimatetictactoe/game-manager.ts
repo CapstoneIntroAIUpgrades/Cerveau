@@ -92,7 +92,7 @@ export class UltimateTicTacToeGameManager extends BaseClasses.GameManager {
         if (this.isSubgameWon(nextSubgame) !== "") this.auxiliary[0] = "0";
         else this.auxiliary[0] = nextSubgame.toString();
 
-        //this.prettyPrintBoard();
+        this.prettyPrintBoard();
 
         return true;
     }

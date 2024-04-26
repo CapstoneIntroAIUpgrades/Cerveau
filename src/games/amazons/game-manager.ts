@@ -100,7 +100,7 @@ export class AmazonsGameManager extends BaseClasses.GameManager {
         this.board[move.startRow!][move.startCol!] = " ";
         this.board[move.endRow!][move.endCol!] = amazonsPlayer.piece;
         this.board[move.placeRow!][move.placeCol!] = move.placedPiece!;
-        //this.prettyPrintBoard();
+        this.prettyPrintBoard();
 
         // No Aux to update
 
