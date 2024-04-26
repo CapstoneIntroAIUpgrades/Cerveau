@@ -100,10 +100,18 @@ export class AmazonsGameManager extends BaseClasses.GameManager {
         this.board[move.startRow!][move.startCol!] = " ";
         this.board[move.endRow!][move.endCol!] = amazonsPlayer.piece;
         this.board[move.placeRow!][move.placeCol!] = move.placedPiece!;
+        this.prettyPrintBoard();
 
         // No Aux to update
 
         return true;
+    }
+
+    protected prettyPrintBoard(): void {
+        for (let i = 9; i > -1; i--) {
+            console.log((i) + " " + this.board[i].join(""));
+        }
+        console.log("  0123456789\n");
     }
 
     protected checkBounds(val: number | null, upperBound: number): boolean {

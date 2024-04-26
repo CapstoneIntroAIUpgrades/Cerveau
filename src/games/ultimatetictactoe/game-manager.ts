@@ -92,7 +92,7 @@ export class UltimateTicTacToeGameManager extends BaseClasses.GameManager {
         if (this.isSubgameWon(nextSubgame) !== "") this.auxiliary[0] = "0";
         else this.auxiliary[0] = nextSubgame.toString();
 
-        //this.prettyPrintBoard();
+        this.prettyPrintBoard();
 
         return true;
     }
@@ -109,7 +109,7 @@ export class UltimateTicTacToeGameManager extends BaseClasses.GameManager {
         for (let i = 2; i > -1; i--) {
             console.log((i + 1) + " " + this.board[i].slice(0, 3).join("") + "|" + this.board[i].slice(3, 6).join("") + "|" + this.board[i].slice(6, 9).join(""));
         }
-        console.log("  abc def ghi");
+        console.log("  abc def ghi\n");
     }
 
     protected isSubgameWon(i: number): string {

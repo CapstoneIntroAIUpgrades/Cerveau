@@ -94,7 +94,7 @@ export class ConnectFourGameManager extends BaseClasses.GameManager {
         // Update board
         // We've already made sure that the positions are valid
         this.board[move.placeRow!][move.placeCol!] = move.placedPiece!;
-        //this.prettyPrintBoard();
+        this.prettyPrintBoard();
 
         // No Aux to update
 
@@ -103,11 +103,11 @@ export class ConnectFourGameManager extends BaseClasses.GameManager {
 
     protected prettyPrintBoard(): void {
         let x = "";
-        console.log(" 0 1 2 3 4 5 6");
         this.board.forEach((line) => {
             x = line.join("|");
             console.log("|" + x + "|");
         });
+        console.log(" 0 1 2 3 4 5 6\n");
     }
 
     protected checkBounds(val: number | null, upperBound: number): boolean {
