@@ -94,7 +94,7 @@ export class ConnectFourGameManager extends BaseClasses.GameManager {
         // Update board
         // We've already made sure that the positions are valid
         this.board[move.placeRow!][move.placeCol!] = move.placedPiece!;
-        this.prettyPrintBoard();
+        //this.prettyPrintBoard();
 
         // No Aux to update
 
