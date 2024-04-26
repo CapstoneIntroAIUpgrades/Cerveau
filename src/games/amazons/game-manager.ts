@@ -163,7 +163,9 @@ export class AmazonsGameManager extends BaseClasses.GameManager {
             this.checkBounds(move.placeCol, this.game.cols) &&
             this.board[move.startRow!][move.startCol!] == player.piece &&
             this.board[move.endRow!][move.endCol!] == " " &&
-            this.board[move.placeRow!][move.placeCol!] == " "
+            (this.board[move.placeRow!][move.placeCol!] == " " ||
+                (move.placeRow == move.startRow &&
+                    move.placeCol == move.startCol))
         );
     }
 
