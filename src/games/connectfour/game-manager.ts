@@ -71,7 +71,7 @@ export class ConnectFourGameManager extends BaseClasses.GameManager {
     /** Gets the row from a col. "Gravity" */
     protected getRowFromCol(col: number): number {
         let row = -1;
-        for (let i = 0; i < this.game.rows; i++) {
+        for (let i = this.game.rows-1; i > -1; i--) {
             if (this.board[i][col] == " ") {
                 row = i;
             }
@@ -103,10 +103,10 @@ export class ConnectFourGameManager extends BaseClasses.GameManager {
 
     protected prettyPrintBoard(): void {
         let x = "";
-        this.board.forEach((line) => {
-            x = line.join("|");
+        for (let i = this.game.rows-1; i > -1; i--) {
+            x = this.board[i].join("|");
             console.log("|" + x + "|");
-        });
+        };
         console.log(" 0 1 2 3 4 5 6\n");
     }
 
@@ -120,9 +120,9 @@ export class ConnectFourGameManager extends BaseClasses.GameManager {
             this.checkBounds(row, this.game.rows) &&
             this.checkBounds(col, this.game.cols) &&
             this.board[row][col] == " " &&
-            (!this.checkBounds(row + 1, this.game.rows) ||
-                this.board[row + 1][col] == "r" ||
-                this.board[row + 1][col] == "y")
+            (!this.checkBounds(row - 1, this.game.rows) ||
+                this.board[row - 1][col] == "r" ||
+                this.board[row - 1][col] == "y")
         );
     }
 
@@ -415,7 +415,7 @@ export class ConnectFourGameManager extends BaseClasses.GameManager {
         // 3= tie
 
         let empty_spaces = 0;
-        for (let i = 0; i < this.game.rows; i++) {
+        for (let i = this.game.rows-1; i > -1; i--) {
             for (let j = 0; j < this.game.cols; j++) {
                 if (this.isValidEmptySpace(i, j)) {
                     empty_spaces = empty_spaces + 1;
