@@ -92,7 +92,7 @@ export class UltimateTicTacToeGameManager extends BaseClasses.GameManager {
         if (this.isSubgameWon(nextSubgame) !== "") this.auxiliary[0] = "0";
         else this.auxiliary[0] = nextSubgame.toString();
 
-        //this.prettyPrintBoard();
+        // this.prettyPrintBoard();
 
         return true;
     }
@@ -147,7 +147,7 @@ export class UltimateTicTacToeGameManager extends BaseClasses.GameManager {
     protected convertSubmoveToMove(subMove: string): SuperGridMove {
         // Split string to string[] then cast each element to int
         let rowStr = "123456789";
-	let colStr = "abcdefghi";
+	    let colStr = "abcdefghi";
         return new SuperGridMove(
             null,
             null,

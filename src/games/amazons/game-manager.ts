@@ -66,20 +66,30 @@ export class AmazonsGameManager extends BaseClasses.GameManager {
         this.board[9][6] = "q";
     }
 
-    /** Amazon move is "<origin row> <origin col> <new row> <new col> <blocking row> <blocking col>" */
+    /** Amazon move is "<origin row><origin col><new row><new col><blocking row><blocking col>" */
     protected convertSubmoveToMove(subMove: string): SuperGridMove {
-        // Split string to string[] then cast each element to int
-        const parts: number[] = subMove
-            .split(" ")
-            .map((str) => Number.parseInt(str));
+	    let colStr = "abcdefghij";
+        let colIndices: number[] = [];
+        for (let i = 0; i < subMove.length; i++) {
+            if(colStr.indexOf(subMove[i]) !== -1){
+                colIndices.push(i);
+            }
+        }
+        let rowVals: number[] = [];
+        for(let i = 0; i < 3; i++){
+            rowVals.push(Number.parseInt(subMove[colIndices[i]+1]))
+            if(rowVals[i] === 1 && Number.parseInt(subMove[colIndices[i]+2]) === 0){
+                rowVals[i] = 10;
+            }
+        }
         return new SuperGridMove(
-            parts[0],
-            parts[1],
-            parts[2],
-            parts[3],
+            rowVals[0] - 1,
+            colStr.indexOf(subMove[colIndices[0]]),
+            rowVals[1] - 1,
+            colStr.indexOf(subMove[colIndices[1]]),
             "X",
-            parts[4],
-            parts[5],
+            rowVals[2] - 1,
+            colStr.indexOf(subMove[colIndices[2]]),
         );
     }
 
@@ -100,7 +110,7 @@ export class AmazonsGameManager extends BaseClasses.GameManager {
         this.board[move.startRow!][move.startCol!] = " ";
         this.board[move.endRow!][move.endCol!] = amazonsPlayer.piece;
         this.board[move.placeRow!][move.placeCol!] = move.placedPiece!;
-        //this.prettyPrintBoard();
+        // this.prettyPrintBoard();
 
         // No Aux to update
 
@@ -108,10 +118,11 @@ export class AmazonsGameManager extends BaseClasses.GameManager {
     }
 
     protected prettyPrintBoard(): void {
-        for (let i = 9; i > -1; i--) {
-            console.log((i) + " " + this.board[i].join(""));
+        console.log(("10") + " " + this.board[9].join(""));
+        for (let i = 8; i > -1; i--) {
+            console.log((i+1) + "  " + this.board[i].join(""));
         }
-        console.log("  0123456789\n");
+        console.log("   abcdefghij\n");
     }
 
     protected checkBounds(val: number | null, upperBound: number): boolean {
